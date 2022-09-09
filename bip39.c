@@ -39,6 +39,7 @@
 #include "pbkdf2.h"
 #include "rand.h"
 #include "sha2.h"
+#include "bip39_english.h"
 
 #if USE_BIP39_CACHE
 
