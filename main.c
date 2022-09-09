@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bip32.h"
 #include "bip39.h"
+#include "curves.h"
 
 void callback(uint32_t current, uint32_t total) {}
 
@@ -33,11 +35,37 @@ int main() {
     uint8_t seed[512 / 8];
     void (*ptr)(uint32_t, uint32_t) = &callback;
     mnemonic_to_seed(mnemonic, passphrase, seed, ptr);
-
+    for (int i = 0; i < 64; i++) {
+        printf("%x ", seed[i]);
+    }
+    printf("\n");
     char seedAsString[500];
     getSeedAsString(seedAsString, seed, 512 / 8);
     printf("Seed original: %s\n", originalSeed);
     printf("Seed    found: %s\n", seedAsString);
 
+    HDNode node;
+    HDNode *out = &node;
+    int seed_len = 64;
+    const uint8_t *seedX = seed;
+    const char *curve = "secp256k";
+
+    int x = hdnode_from_seed(seedX, 64, SECP256K1_NAME, out);
+
+    if (x == 0) {
+        printf("Wrong curve name!!! Enter valid curve name\n");
+    }
+
+    printf("Private key is: ");
+    for (int i = 0; i < 32; i++) {
+        printf("%x", out->private_key[i]);
+    }
+    printf("\n");
+    hdnode_fill_public_key(out);
+    printf("Public key is:  ");
+    for (int i = 0; i < 33; i++) {
+        printf("%x", out->public_key[i]);
+    }
+    printf("\n");
     return 0;
 }
