@@ -1,0 +1,172 @@
+Seed original: c0db23b48bb1e776aa47b0a6002f4bd456183f2a6b124cb02ffef330447e4ea38d6ca041c85f939579875aa59dd45ce9a1f99335d806dd72fbee1b7a5a1466f8
+
+
+
+
+Seed    found: c0db23b48bb1e776aa47b0a6002f4bd456183f2a6b124cb02ffef330447e4ea38d6ca041c85f939579875aa59dd45ce9a1f99335d806dd72fbee1b7a5a1466f8
+
+
+
+
+MASTER NODE
+Private Key: 
+fc922747a3dbae9b2880a26f47072ce4221f6128d0e1d87829b4bede3ffcc22d
+Public Key: 
+0392b6fd400cb281d288991c45fc23becfb873dd7db9ba482ba5f2f0e462e8cc61
+Chain Code: 
+0f0331ced61f1fa6b227e59df7fa96453eec2e06f942a8c532bdaba9ae04af4c
+
+
+
+PROCESS NODE
+Private Key: 
+7d48d4df6dc3cdd02471de902a0bc8f0f9d134dec631c64eb4ca6d3b22f0b516
+Public Key: 
+02180b7062efbfddca02a3a703e904b2fa638a57fc662458a54840aa3d050fc900
+Chain Code: 
+c8bae5e4dc478f599337d3f7b1368c422143d77e0fa28e64cba19f2972c32b6c
+
+
+
+COIN NODE
+Private Key: 
+c472a101da86519ef5f82a84f81882934943177b51f34eaeb4836127f6036ae7
+Public Key: 
+037de1987b2c21e658b8637fbca079d9b3fe6d8090def78c186665e79a6be77cee
+Chain Code: 
+a5479ebfd469b6159215bf3c10f873cefb670f401bc67d94e974783ddddf7541
+
+
+
+ACCOUNT NODE
+Private Key: 
+887572b16aa9f69d755b428f059a24cb12ad0f228fb4e90e2a9a5ed38fd02c22
+Public Key: 
+028f438ea3772155fb9cac6cb704df3b3edb3a8f4a18e74bf030270bef9712df77
+Chain Code: 
+5badbe58a9b1bccb5c2299b43ff61fc1a4700957fb06e8f1694a706fdbe270e3
+
+
+
+CHANGE NODE
+Private Key: 
+76a643369b41d1d44fcb6287e1f0c1040653b1a746b0538ef8414f2efd57f33f
+Public Key: 
+0292057e3cc857f124e670160c023c3cb19aafe1a6e16ead16faf261b605061ef4
+Chain Code: 
+1568a6f004ed8d77c959d972787eb7d1d3b44582474b04388123df8c371ab801
+
+
+
+ADDRESS NODE
+Private Key: 
+369c3284b9ab225d1e3701ed71454be001035ec02ee972621a5ed26b828d06c3
+Public Key: 
+031d78f66506bee53fd29a6f39dad0bc6a7c9cd103cce4867b65bfcfb9c878aa80
+Chain Code: 
+c1790a6e3cfe6e71c6424fef92a426f1ca16d6be7bba3bc2cdbfcc68d0de22ec
+
+
+
+UNSIGNED TXN AS BYTE ARRAY:
+02 00 00 00 01 c7 0d e0 47 3c 83 94 3c 72 28 23 b9 ea d6 47 45 df f1 b1 79 a6 c0 01 20 28 1d 2f 7b ad 3c ce be 01 00 00 00 19 76 a9 14 05 9d 09 9e 62 cb d8 9a ba a7 1a 3f d4 9a 81 98 2f 97 e8 aa 88 ac ff ff ff ff 01 60 ea 00 00 00 00 00 00 19 76 a9 14 83 3e 8b 18 09 3b e4 87 99 9c 70 da 47 ab f1 ad 29 4e 18 27 88 ac 00 00 00 00 
+
+
+
+TRANSACTION STRUCT: 
+Version: 
+02 00 00 00 
+Number of inputs: 
+01
+Previous txn hash: 
+c7 0d e0 47 3c 83 94 3c 72 28 23 b9 ea d6 47 45 df f1 b1 79 a6 c0 01 20 28 1d 2f 7b ad 3c ce be 
+Previous output idx: 
+01 00 00 00 
+Script len: 
+19
+Script signature 
+(only a placeholder for now)
+76 a9 14 05 9d 09 9e 62 cb d8 9a ba a7 1a 3f d4 9a 81 98 2f 97 e8 aa 88 ac 
+Sequence: 
+ff ff ff ff 
+Number of outputs: 
+01
+Value: 
+60 ea 00 00 00 00 00 00 
+Script len: 
+19
+Script pub key: 
+76 a9 14 83 3e 8b 18 09 3b e4 87 99 9c 70 da 47 ab f1 ad 29 4e 18 27 88 ac 
+Locktime: 
+00 00 00 00 
+
+
+
+AFTER DOUBLE HASHING USING SHA256:
+2d dd 62 f4 5e e0 63 05 2d 1d 18 1c 6e 06 ed 42 83 9e d5 bc 56 eb d7 a5 1b 4a cb 2d 1b 93 62 d5 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f0 cb 2b 02 01 00 
+
+
+
+SIGNATURE:
+80 c5 c8 68 96 a4 53 1e 7e 5f e2 4a e8 de 82 56 a8 7c 8a 35 75 b7 43 f8 8e 40 01 3b f3 ea 00 41 11 7a 94 06 2e 2f 2d 7c 38 d7 d7 00 27 e0 6b 08 33 83 f2 eb ed 96 04 3d 9e 01 0d 44 a9 16 bf 5d 
+
+
+
+DER FORMAT:
+30 45 02 21 00 80 c5 c8 68 96 a4 53 1e 7e 5f e2 4a e8 de 82 56 a8 7c 8a 35 75 b7 43 f8 8e 40 01 3b f3 ea 00 41 02 20 11 7a 94 06 2e 2f 2d 7c 38 d7 d7 00 27 e0 6b 08 33 83 f2 eb ed 96 04 3d 9e 01 0d 44 a9 16 bf 
+
+
+
+SCRIPT SIG: 
+Pushdata opcode: 
+2f
+Header: 
+30
+Sig len: 
+45
+Integer: 
+02
+R len: 
+21
+R: 
+00 80 c5 c8 68 96 a4 53 1e 7e 5f e2 4a e8 de 82 56 a8 7c 8a 35 75 b7 43 f8 8e 40 01 3b f3 ea 00 
+Integer: 
+41
+S len: 
+02
+S: 
+20 11 7a 94 06 2e 2f 2d 7c 38 d7 d7 00 27 e0 6b 08 33 83 f2 eb ed 96 04 3d 9e 01 0d 44 a9 16 bf 
+Sighash code: 
+01
+Pushdata opcode: 
+15
+Pub key: 
+03 1d 78 f6 65 06 be e5 3f d2 9a 6f 39 da d0 bc 6a 7c 9c d1 03 cc e4 86 7b 65 bf cf b9 c8 78 aa 80 
+
+
+
+TRANSACTION STRUCT: 
+Version: 
+02 00 00 00 
+Number of inputs: 
+01
+Previous txn hash: 
+c7 0d e0 47 3c 83 94 3c 72 28 23 b9 ea d6 47 45 df f1 b1 79 a6 c0 01 20 28 1d 2f 7b ad 3c ce be 
+Previous output idx: 
+01 00 00 00 
+Script len: 
+19
+Script signature 
+2f 30 45 02 21 00 80 c5 c8 68 96 a4 53 1e 7e 5f e2 4a e8 de 82 56 a8 7c 8a 35 75 b7 43 f8 8e 40 01 3b f3 ea 00 41 02 20 11 7a 94 06 2e 2f 2d 7c 38 d7 d7 00 27 e0 6b 08 33 83 f2 eb ed 96 04 3d 9e 01 0d 44 a9 16 bf 01 15 03 1d 78 f6 65 06 be e5 3f d2 9a 6f 39 da d0 bc 6a 7c 9c d1 03 cc e4 86 7b 65 bf cf b9 c8 78 aa 80 
+Sequence: 
+ff ff ff ff 
+Number of outputs: 
+01
+Value: 
+60 ea 00 00 00 00 00 00 
+Script len: 
+19
+Script pub key: 
+76 a9 14 83 3e 8b 18 09 3b e4 87 99 9c 70 da 47 ab f1 ad 29 4e 18 27 88 ac 
+Locktime: 
+00 00 00 00
