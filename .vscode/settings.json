@@ -2,6 +2,8 @@
   "files.associations": {
     "*.ejs": "html",
     "stdint.h": "c",
-    "algorithm": "c"
+    "algorithm": "c",
+    "bip32.h": "c",
+    "stdio.h": "c"
   }
 }

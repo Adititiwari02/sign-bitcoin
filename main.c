@@ -34,38 +34,33 @@
 #include "secp256k1.h"
 #include "sha2.h"
 
-struct txn_struct {
-    uint8_t version[4];
-    uint8_t num_inputs;
+int digest_size = 32;
+int sig_size = 64;
+int der_size = 70;
+int script_sig_size = 107;  // is changed later based on der format
+
+struct input_struct {
     uint8_t prev_txn_hash[32];
     uint8_t prev_output_idx[4];
     uint8_t script_len;
-    uint8_t script_sig[106];
+    uint8_t *script_sig;
     uint8_t sequence[4];
-    uint8_t num_outputs;
-    uint8_t value[8];
-    uint8_t script_len2;
-    uint8_t script_pubkey[25];
-    uint8_t lock_time[4];
 };
 
-void callback(uint32_t current, uint32_t total) {}
+struct output_struct {
+    uint8_t value[8];
+    uint8_t script_len;
+    uint8_t *script_pubkey;
+};
 
-int callback2(uint8_t by, uint8_t sig[64]) { return 0; }
-
-void get_seed_as_string(char seedAsString[500], uint8_t *seed, int size) {
-    unsigned char *pin = seed;
-    const char *hex = "0123456789abcdef";
-    char *pout = seedAsString;
-    int i = 0;
-    for (; i < size - 1; ++i) {
-        *pout++ = hex[(*pin >> 4) & 0xF];
-        *pout++ = hex[(*pin++) & 0xF];
-    }
-    *pout++ = hex[(*pin >> 4) & 0xF];
-    *pout++ = hex[(*pin) & 0xF];
-    *pout = 0;
-}
+struct txn_struct {
+    uint8_t version[4];
+    uint8_t num_inputs;
+    struct input_struct *inputs;
+    uint8_t num_outputs;
+    struct output_struct *outputs;
+    uint8_t lock_time[4];
+};
 
 void display_node_info(HDNode *node, char *name) {
     printf("\n\n\n\n%s", name);
@@ -85,158 +80,165 @@ void display_node_info(HDNode *node, char *name) {
 
 void fill_txn_struct(struct txn_struct *txn, uint8_t *unsigned_txn_byte_array) {
     int idx = 0;
+
+    // version
     for (int i = 0; i < 4; i++) {
         txn->version[i] = unsigned_txn_byte_array[idx++];
     }
+
+    // number of inputs
     txn->num_inputs = unsigned_txn_byte_array[idx++];
-    for (int i = 0; i < 32; i++) {
-        txn->prev_txn_hash[i] = unsigned_txn_byte_array[idx++];
+
+    // input details
+    txn->inputs = (struct input_struct *)malloc(txn->num_inputs *
+                                                sizeof(struct input_struct));
+    for (int i = 0; i < txn->num_inputs; i++) {
+        int idx1 = 0;
+        for (int j = 0; j < 32; j++) {
+            txn->inputs[i].prev_txn_hash[j] = unsigned_txn_byte_array[idx++];
+        }
+        for (int j = 0; j < 4; j++) {
+            txn->inputs[i].prev_output_idx[j] = unsigned_txn_byte_array[idx++];
+        }
+        txn->inputs[i].script_len = unsigned_txn_byte_array[idx++];
+        txn->inputs[i].script_sig =
+            (uint8_t *)malloc(txn->inputs[i].script_len * sizeof(uint8_t));
+        for (int j = 0; j < txn->inputs[i].script_len; j++) {
+            txn->inputs[i].script_sig[j] = unsigned_txn_byte_array[idx++];
+        }
+        for (int j = 0; j < 4; j++) {
+            txn->inputs[i].sequence[j] = unsigned_txn_byte_array[idx++];
+        }
     }
-    for (int i = 0; i < 4; i++) {
-        txn->prev_output_idx[i] = unsigned_txn_byte_array[idx++];
-    }
-    txn->script_len = unsigned_txn_byte_array[idx++];
-    for (int i = 0; i < 25; i++) {
-        txn->script_sig[i] = unsigned_txn_byte_array[idx++];
-    }
-    for (int i = 0; i < 4; i++) {
-        txn->sequence[i] = unsigned_txn_byte_array[idx++];
-    }
+
+    // number of outputs
     txn->num_outputs = unsigned_txn_byte_array[idx++];
-    for (int i = 0; i < 8; i++) {
-        txn->value[i] = unsigned_txn_byte_array[idx++];
+
+    // outputs details
+    txn->outputs = (struct output_struct *)malloc(txn->num_outputs *
+                                                  sizeof(struct output_struct));
+    for (int i = 0; i < txn->num_outputs; i++) {
+        for (int j = 0; j < 8; j++) {
+            txn->outputs[i].value[j] = unsigned_txn_byte_array[idx++];
+        }
+        txn->outputs[i].script_len = unsigned_txn_byte_array[idx++];
+        txn->outputs[i].script_pubkey =
+            (uint8_t *)malloc(txn->outputs[i].script_len * sizeof(uint8_t));
+        for (int j = 0; j < txn->outputs[i].script_len; j++) {
+            txn->outputs[i].script_pubkey[j] = unsigned_txn_byte_array[idx++];
+        }
     }
-    txn->script_len2 = unsigned_txn_byte_array[idx++];
-    for (int i = 0; i < 25; i++) {
-        txn->script_pubkey[i] = unsigned_txn_byte_array[idx++];
-    }
+
+    // locktime
     for (int i = 0; i < 4; i++) {
         txn->lock_time[i] = unsigned_txn_byte_array[idx++];
     }
 }
 
-void print_txn_info(struct txn_struct *txn, int sz) {
-    printf("\n\n\n\nTRANSACTION STRUCT: ");
-    printf("\nVersion: \n");
-    for (int i = 0; i < 4; i++) {
-        printf("%02x ", txn->version[i]);
-    }
-
-    printf("\nNumber of inputs: \n%02x", txn->num_inputs);
-
-    printf("\nPrevious txn hash: \n");
-    for (int i = 0; i < 32; i++) {
-        printf("%02x ", txn->prev_txn_hash[i]);
-    }
-
-    printf("\nPrevious output idx: \n");
-    for (int i = 0; i < 4; i++) {
-        printf("%02x ", txn->prev_output_idx[i]);
-    }
-
-    printf("\nScript len: \n%02x", txn->script_len);
-
-    printf("\nScript signature \n");
-    if (sz == 25) {
-        printf("(only a placeholder for now)\n");
-    }
-    for (int i = 0; i < sz; i++) {
-        printf("%02x ", txn->script_sig[i]);
-    }
-
-    printf("\nSequence: \n");
-    for (int i = 0; i < 4; i++) {
-        printf("%02x ", txn->sequence[i]);
-    }
-
-    printf("\nNumber of outputs: \n%02x", txn->num_outputs);
-
-    printf("\nValue: \n");
-    for (int i = 0; i < 8; i++) {
-        printf("%02x ", txn->value[i]);
-    }
-
-    printf("\nScript len: \n%02x", txn->script_len2);
-
-    printf("\nScript pub key: \n");
-    for (int i = 0; i < 25; i++) {
-        printf("%02x ", txn->script_pubkey[i]);
-    }
-
-    printf("\nLocktime: \n");
-    for (int i = 0; i < 4; i++) {
-        printf("%02x ", txn->lock_time[i]);
-    }
-}
-
 void fill_script_sig(uint8_t *script_sig, uint8_t *der, uint8_t *public_key) {
-    int idx = 0;
-    script_sig[idx++] = 47;
-    for (int i = 0; i < 70; i++) {
+    int idx = 0, num;
+    if (der[1] == 68)
+        num = 71;
+    else if (der[1] == 69)
+        num = 72;
+    else if (der[1] == 70)
+        num = 73;
+    else {
+        printf("\n\nUnhandled case!!! TERMINATING!!\n\n");
+        return;
+    }
+    script_sig[idx++] = num;
+    for (int i = 0; i < der_size; i++) {
         script_sig[idx++] = der[i];
     }
     script_sig[idx++] = 1;
-    script_sig[idx++] = 21;
+    script_sig[idx++] = 33;
     for (int i = 0; i < 33; i++) {
         script_sig[idx++] = public_key[i];
-    }
-}
-
-void print_script_sig_info(u_int8_t *script_sig) {
-    printf("\n\n\n\nSCRIPT SIG: ");
-    int idx = 0;
-    printf("\nPushdata opcode: \n%02x", script_sig[idx++]);
-    printf("\nHeader: \n%02x", script_sig[idx++]);
-    printf("\nSig len: \n%02x", script_sig[idx++]);
-    printf("\nInteger: \n%02x", script_sig[idx++]);
-    printf("\nR len: \n%02x", script_sig[idx++]);
-    printf("\nR: \n");
-    for (int i = 0; i < 32; i++) {
-        printf("%02x ", script_sig[idx++]);
-    }
-    printf("\nInteger: \n%02x", script_sig[idx++]);
-    printf("\nS len: \n%02x", script_sig[idx++]);
-    printf("\nS: \n");
-    for (int i = 0; i < 32; i++) {
-        printf("%02x ", script_sig[idx++]);
-    }
-    printf("\nSighash code: \n%02x", script_sig[idx++]);
-    printf("\nPushdata opcode: \n%02x", script_sig[idx++]);
-    printf("\nPub key: \n");
-    for (int i = 0; i < 33; i++) {
-        printf("%02x ", script_sig[idx++]);
     }
 }
 
 void print_array(uint8_t *arr, int sz, char *name) {
     printf("\n\n\n\n%s\n", name);
     for (int i = 0; i < sz; i++) {
-        printf("%02x ", arr[i]);
+        printf("%02x", arr[i]);
+    }
+}
+
+void display_txn(struct txn_struct *txn, int input_number) {
+    printf("\n\nSIGNED TRANSACTION INPUT NUMBER: %d\n", input_number);
+    int idx = 0;
+
+    // version
+    for (int i = 0; i < 4; i++) {
+        printf("%02x", txn->version[i]);
+    }
+
+    // number of inputs
+    printf("%02x", txn->num_inputs);
+
+    // input details
+    for (int i = 0; i < txn->num_inputs; i++) {
+        int idx1 = 0;
+        for (int j = 0; j < 32; j++) {
+            printf("%02x", txn->inputs[i].prev_txn_hash[j]);
+        }
+        for (int j = 0; j < 4; j++) {
+            printf("%02x", txn->inputs[i].prev_output_idx[j]);
+        }
+        printf("%02x", txn->inputs[i].script_len);
+        for (int j = 0; j < txn->inputs[i].script_len; j++) {
+            printf("%02x", txn->inputs[i].script_sig[j]);
+        }
+        for (int j = 0; j < 4; j++) {
+            printf("%02x", txn->inputs[i].sequence[j]);
+        }
+    }
+
+    // number of outputs
+    printf("%02x", txn->num_outputs);
+
+    // outputs details
+    for (int i = 0; i < txn->num_outputs; i++) {
+        for (int j = 0; j < 8; j++) {
+            printf("%02x", txn->outputs[i].value[j]);
+        }
+        printf("%02x", txn->outputs[i].script_len);
+
+        for (int j = 0; j < txn->outputs[i].script_len; j++) {
+            printf("%02x", txn->outputs[i].script_pubkey[j]);
+        }
+    }
+
+    // locktime
+    for (int i = 0; i < 4; i++) {
+        printf("%02x", txn->lock_time[i]);
     }
 }
 
 int main() {
     const char *mnemonic =
-        "crew squeeze kid test vault razor era rotate employ remove rare fat "
-        "peasant celery stable certain whale clump flush cash goat jacket wear "
-        "rally";
+        "thing lift table helmet company income lottery cook benefit rule "
+        "erupt lava drive universe sniff repeat doll truth pepper warrior "
+        "dilemma reject state lock";
     const char *original_seed =
-        "c0db23b48bb1e776aa47b0a6002f4bd456183f2a6b124cb02ffef330447e4ea38d6ca0"
-        "41c85f939579875aa59dd45ce9a1f99335d806dd72fbee1b7a5a1466f8";
+        "30b8e95cd08a8eb02ebe916becbf468b274c61410196f1b300fc6f7e5698c042aa0cfd"
+        "69d4b478b488316e71a26f648df6262c359b4e372b464ba2e8bdee771d";
 
     const char *passphrase = "";
-    uint8_t seed[512 / 8];
-    void (*ptr)(uint32_t, uint32_t) = &callback;
-    mnemonic_to_seed(mnemonic, passphrase, seed, ptr);
+    int sizeOfSeed = 512 / 8;
+    uint8_t seed[sizeOfSeed];
+    mnemonic_to_seed(mnemonic, passphrase, seed, NULL);
 
-    char seed_as_string[500];
-    get_seed_as_string(seed_as_string, seed, 512 / 8);
-    printf("\nSeed original: %s\n", original_seed);
-    printf("\n\n\n\nSeed    found: %s\n", seed_as_string);
+    printf("\nSeed original: \n%s", original_seed);
+    printf("\n\nSeed    found: \n");
+    for (int i = 0; i < sizeOfSeed; i++) {
+        printf("%02x", seed[i]);
+    }
 
     HDNode master_node;
     HDNode *out = &master_node;
-    int x = hdnode_from_seed(seed, 64, SECP256K1_NAME, out);
+    int x = hdnode_from_seed(seed, sizeOfSeed, SECP256K1_NAME, out);
     hdnode_fill_public_key(out);
     display_node_info(out, "MASTER NODE");
 
@@ -264,57 +266,77 @@ int main() {
     hdnode_fill_public_key(out);
     display_node_info(out, "CHANGE NODE");
 
+    HDNode *out2 = out;
     // Address Node
     child_num = 0;
     x = hdnode_private_ckd(out, child_num);
     hdnode_fill_public_key(out);
     display_node_info(out, "ADDRESS NODE");
 
-    uint8_t *private_key = out->private_key;
-    uint8_t *public_key = out->public_key;
-
     const char unsigned_txn[] =
-        "0200000001c70de0473c83943c722823b9ead64745dff1b179a6c00120281d2f7bad3c"
-        "cebe010000001976a914059d099e62cbd89abaa71a3fd49a81982f97e8aa88acffffff"
-        "ff0160ea0000000000001976a914833e8b18093be487999c70da47abf1ad294e182788"
-        "ac00000000";
+        "02000000012a4bd05329a127c63a62b0813b58d7cfe37ea28742f7d73ec968bc601b6c"
+        "ec6c010000001976a914ac625f3cf806a057ecf458cb39db7a7cd3b5cd0f88acffffff"
+        "ff0210270000000000001976a914ac625f3cf806a057ecf458cb39db7a7cd3b5cd0f88"
+        "ac9a9c0000000000001976a914df61b5ce3c121b3f6253ef1953a017117cb716ac88ac"
+        "0000000001000000";
 
     const char *pos = unsigned_txn;
-    uint8_t unsigned_txn_byte_array[110];
-    for (size_t count = 0; count < sizeof unsigned_txn_byte_array /
-                                       sizeof *unsigned_txn_byte_array;
-         count++) {
+    size_t size_unsigned_byte_array = strlen(unsigned_txn) / 2;
+    uint8_t *unsigned_txn_byte_array = malloc(size_unsigned_byte_array);
+    memset(unsigned_txn_byte_array, 0, size_unsigned_byte_array);
+    for (size_t count = 0; count < size_unsigned_byte_array; count++) {
         sscanf(pos, "%2hhx", &unsigned_txn_byte_array[count]);
         pos += 2;
     }
-    print_array(unsigned_txn_byte_array, 110, "UNSIGNED TXN AS BYTE ARRAY:");
+    print_array(unsigned_txn_byte_array, size_unsigned_byte_array,
+                "UNSIGNED TXN AS BYTE ARRAY:");
 
     struct txn_struct txn;
     struct txn_struct *txn_ptr = &txn;
     fill_txn_struct(txn_ptr, unsigned_txn_byte_array);
-    print_txn_info(txn_ptr, 25);
 
-    uint8_t sha_digest_1[64], sha_digest_2[64];
-    sha256_Raw(unsigned_txn_byte_array, 110, sha_digest_1);
-    sha256_Raw(sha_digest_1, 64, sha_digest_2);
-    print_array(sha_digest_2, 64, "AFTER DOUBLE HASHING USING SHA256:");
+    uint8_t sha_digest_1[digest_size], sha_digest_2[digest_size];
+    sha256_Raw(unsigned_txn_byte_array, size_unsigned_byte_array, sha_digest_1);
+    sha256_Raw(sha_digest_1, digest_size, sha_digest_2);
+    print_array(sha_digest_2, digest_size,
+                "AFTER DOUBLE HASHING USING SHA256:");
 
-    uint8_t sig[64];
-    int (*ptr2)(uint8_t, uint8_t[64]) = &callback2;
+    uint8_t sig[sig_size];
     const ecdsa_curve *curve = &secp256k1;
-    x = ecdsa_sign_digest(curve, private_key, sha_digest_2, sig, public_key,
-                          ptr2);
-    print_array(sig, 64, "SIGNATURE:");
+    x = ecdsa_sign_digest(curve, out->private_key, sha_digest_2, sig, NULL,
+                          NULL);
+    print_array(sig, sig_size, "SIGNATURE:");
 
-    uint8_t der[70];
+    uint8_t der[der_size];
     x = ecdsa_sig_to_der(sig, der);
-    print_array(der, 70, "DER FORMAT:");
+    print_array(der, der_size, "DER FORMAT:");
+    if (der[1] == 68)
+        script_sig_size = 106;
+    else if (der[1] == 69)
+        script_sig_size = 107;
+    else if (der[1] == 70)
+        script_sig_size = 108;
 
-    uint8_t script_sig[106];
-    fill_script_sig(script_sig, der, public_key);
-    print_script_sig_info(script_sig);
+    uint8_t script_sig[script_sig_size];
+    fill_script_sig(script_sig, der, out->public_key);
+    print_array(script_sig, script_sig_size, "SCRIPT SIG: ");
 
-    memcpy(txn.script_sig, script_sig, sizeof(script_sig));
-    print_txn_info(txn_ptr, 106);
+    // for multi input txns, sign each of them individually and keep the others
+    // script sig empty
+    for (int i = 0; i < txn.num_inputs; i++) {
+        txn.inputs[i].script_len = script_sig_size;
+        txn.inputs[i].script_sig =
+            (uint8_t *)malloc(txn.inputs[i].script_len * sizeof(uint8_t));
+        memcpy(txn.inputs[i].script_sig, script_sig, script_sig_size);
+        for (int j = 0; j < txn.num_inputs; j++) {
+            if (i != j) {
+                txn.inputs[i].script_len = 0;
+                txn.inputs[i].script_sig =
+                    (uint8_t *)malloc(0 * sizeof(uint8_t));
+            }
+        }
+        // displaying the signed transaction for the ith input
+        display_txn(txn_ptr, i + 1);
+    }
     return 0;
 }
