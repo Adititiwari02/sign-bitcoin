@@ -37,7 +37,7 @@
 int digest_size = 32;
 int sig_size = 64;
 int der_size = 70;
-int script_sig_size = 107;  // is changed later based on der format
+int script_sig_size = 107;  // is changed later based on der
 
 struct input_struct {
     uint8_t prev_txn_hash[32];
